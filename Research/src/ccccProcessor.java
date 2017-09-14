@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
@@ -56,6 +57,7 @@ public class ccccProcessor {
 		
 		
 		boolean Boolproject_summary=false; 
+		int RegionId = 0 ;
 		
 		 try {
 				//File Path
@@ -133,9 +135,11 @@ public class ccccProcessor {
 		                   }
 	
 		                   if(startElement.getName().getLocalPart().equals("project_summary")){   
+		                	   HashMap<String ,Integer> codeMetricsdict= new HashMap<String,Integer>();
+		                	   codeMetricsdict.put("number_of_modules", 1);
 		                	   
 		                	   writer.writeStartElement("Region");
-		                	   writer.writeAttribute("id","1");
+		                	   writer.writeAttribute("id",RegionId+"");
 		                	   writer.writeAttribute("parentID", "0");
 		                	   writer.writeAttribute("language", "C++");
 		                	   writer.writeAttribute("type", "Project");
@@ -173,9 +177,13 @@ public class ccccProcessor {
 				       			        if(myAttribute.getName().toString().equals("value")){
 				       			        		writer.writeAttribute("value", myAttribute.getValue());
 				       			        }   		
-				       				  	}      if(startElement.getName().getLocalPart().equals("lines_of_code")) {
+				       				  	}      if(startElementmetrics.getName().getLocalPart().equals("lines_of_code")) {
 				       		                	   
 				       		                   }
+				       				  			if(codeMetricsdict.containsKey(startElementmetrics.getName().getLocalPart())){
+				       				  					
+				       				  				System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaa");
+				       				  			}
 				       		                   
 				       		                   
 				       		                }
