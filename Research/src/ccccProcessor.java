@@ -7,10 +7,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.*;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
@@ -24,6 +21,7 @@ import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
 public class ccccProcessor {
+	private String folderName = "";
 	// open xml
 	// convert to one xml
 	// store new xml
@@ -31,12 +29,12 @@ public class ccccProcessor {
 	// try to find cccc.xml
 	// if no - error
 	public ccccProcessor(String folderName) {
-
+		this.folderName=folderName ;
 		File file = new File(folderName);
 
 		if (file.isDirectory()) {
 			// our main file
-			file = new File(folderName + "/cccc.xml");
+			file = new File(this.folderName+"/cccc.xml");
 
 			if (file.exists()) {
 				// start processing main file
@@ -55,7 +53,7 @@ public class ccccProcessor {
 		System.out.println("Main file processing");
 
 		boolean Boolproject_summary = false;
-		int RegionId = 0;
+		int RegionId = 1;
 		ArrayList<String> modules = new ArrayList<String>();
 
 		try {
@@ -127,9 +125,11 @@ public class ccccProcessor {
 
 						writer.writeStartElement("Region");
 						writer.writeAttribute("id", RegionId + "");
+						RegionId++;
 						writer.writeAttribute("parentID", "0");
 						writer.writeAttribute("language", "C++");
 						writer.writeAttribute("type", "Project");
+
 						// where take name ?
 						writer.writeAttribute("name", "ProjectSummary");
 						xmlEvent = xmlEventReader.nextEvent();
@@ -213,10 +213,110 @@ public class ccccProcessor {
 						
 						if(!modules.isEmpty()) {
 							for (String modName : modules) {
-								Reader moduleFileReader = new FileReader(file);
+
+
+								Reader moduleFileReader = new FileReader(this.folderName+"\\"+modName+".xml");
+
+								// Get XMLInputFactory instance.
+								XMLInputFactory xmlInputFactoryModule = XMLInputFactory.newInstance();
+
+								// Create XMLEventReader object.
+								XMLEventReader xmlEventReaderModuleFile =null;
+								xmlEventReaderModuleFile=xmlInputFactoryModule.createXMLEventReader(moduleFileReader);
 								//same as for main 
-								
-								
+
+								writer.writeStartElement("Region");
+								writer.writeAttribute("id", RegionId + "");
+								RegionId++;
+								writer.writeAttribute("parentID", "1");
+								writer.writeAttribute("language", "C++");
+								writer.writeAttribute("type", "module");
+
+								// where take name ?
+								writer.writeAttribute("name", modName);
+
+								while (xmlEventReaderModuleFile.hasNext()) {
+									// Get next event.
+									XMLEvent xmlEventmodule = xmlEventReaderModuleFile.nextEvent();
+
+									if (xmlEventmodule.isStartElement()) {
+										// Get event as start element.
+										 startElement = xmlEventmodule.asStartElement();
+
+										if (startElement.getName().getLocalPart().equals("module_summary")) {
+											HashMap<String, Integer> codeMetricsdict = new HashMap<String, Integer>();
+											codeMetricsdict.put("number_of_modules", 1);
+
+											xmlEventmodule = xmlEventReaderModuleFile.nextEvent();
+
+											System.out.println(xmlEvent.toString());
+											writer.writeCharacters(System.getProperty("line.separator"));
+											writer.writeStartElement("Metrics");
+											Boolproject_summary=false;
+											while (!Boolproject_summary) {
+												xmlEventmodule = xmlEventReaderModuleFile.nextEvent();
+
+
+												if (xmlEventmodule.isStartElement()) {
+													writer.writeCharacters(System.getProperty("line.separator"));
+													writer.writeStartElement("Metric");
+													writer.writeAttribute("code", "1");
+
+													// Get event as start element.
+													StartElement startElementmetrics = xmlEventmodule.asStartElement();
+													// choose appropriate name using map
+													writer.writeAttribute("name", startElementmetrics.getName().toString());
+
+													Iterator<Attribute> attributes = startElementmetrics.getAttributes();
+													while (attributes.hasNext()) {
+														Attribute myAttribute = attributes.next();
+														if (myAttribute.getName().toString().equals("value")) {
+															writer.writeAttribute("value", myAttribute.getValue());
+														}
+													}
+													if (startElementmetrics.getName().getLocalPart().equals("lines_of_code")) {
+
+													}
+													if (codeMetricsdict.containsKey(startElementmetrics.getName().getLocalPart())) {
+
+														System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaa");
+													}
+
+												}
+												if (xmlEventmodule.isEndElement()) {
+													writer.writeEndElement();
+												}
+
+												// check if we still inside
+												if (xmlEventmodule.isEndElement()) {
+													Boolproject_summary = xmlEventmodule.asEndElement().getName().toString()
+															.equals("module_summary");
+												}
+
+											}
+
+										}
+
+
+
+									}
+									if (xmlEventmodule.isEndElement()) {
+
+										if (xmlEventmodule.asEndElement().getName().toString().equals("project_summary")) { // end Region
+											Boolproject_summary = false;
+											writer.writeEndElement();
+
+										}
+										// Get event as end element.
+										EndElement endElement = xmlEventmodule.asEndElement();
+										System.out.println("End Element: " + endElement.getName());
+									}
+
+
+								}
+
+
+								writer.writeEndElement();
 								//for each module create region - parent = 1 id = idprev ++ 
 								
 								///File = new(modName+".xml");
