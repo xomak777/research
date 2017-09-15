@@ -14,7 +14,8 @@ public class FileWorker {
 
 	
 	 public static void main(String[] args) {
-			final File folder = new File("/home/innopolis/Desktop");
+		 	final File folder = new File("D:\\ProgramFiles\\CCCC\\.cccc");
+			//final File folder = new File("/home/innopolis/Desktop");
 			listFilesForFolder(folder);
 	    }
 
