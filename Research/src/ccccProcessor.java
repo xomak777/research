@@ -56,6 +56,42 @@ public class ccccProcessor {
 		int RegionId = 1;
 		ArrayList<String> modules = new ArrayList<String>();
 
+		HashMap<String, Integer> codeMetricsdict = new HashMap<String, Integer>();
+		codeMetricsdict.put("number_of_modules", 1);
+		codeMetricsdict.put("lines_of_code", 2);
+		codeMetricsdict.put("lines_of_code_per_module", 3);
+		codeMetricsdict.put("McCabes_cyclomatic_complexity", 4);
+		codeMetricsdict.put("McCabes_cyclomatic_complexity_per_module", 5);
+		codeMetricsdict.put("lines_of_comment", 6);
+		codeMetricsdict.put("lines_of_comment_per_module", 7);
+		codeMetricsdict.put("lines_of_code_per_module", 8);
+		codeMetricsdict.put("lines_of_code_per_line_of_comment", 9);
+		codeMetricsdict.put("McCabes_cyclomatic_complexity_per_line_of_comment", 10);
+		codeMetricsdict.put("IF4", 11);
+		codeMetricsdict.put("IF4_per_module", 12);
+		codeMetricsdict.put("IF4_visible", 13);
+		codeMetricsdict.put("IF4_concrete", 14);
+		codeMetricsdict.put("IF4_visible_per_module", 15);
+		codeMetricsdict.put("rejected_lines_of_code", 16);
+		codeMetricsdict.put("lines_of_code_per_member_function", 17);
+		codeMetricsdict.put("McCabes_cyclomatic_complexity_per_member_function", 18);
+		codeMetricsdict.put("weighted_methods_per_class_unity", 19);
+		codeMetricsdict.put("weighted_methods_per_class_visibility", 20);
+		codeMetricsdict.put("number_of_children", 21);
+		codeMetricsdict.put("coupling_between_objects", 22);
+		codeMetricsdict.put("lines_of_code_number_of_childrenper_member_function", 23);
+		codeMetricsdict.put("depth_of_inheritance_tree", 24);
+		codeMetricsdict.put("IF4_per_member_function", 25);
+		codeMetricsdict.put("IF4_concrete_per_member_function", 26);
+		codeMetricsdict.put("IF4_visible_per_member_function", 27);
+
+
+
+
+
+
+
+
 		try {
 			// File Path
 			// For out
@@ -120,8 +156,7 @@ public class ccccProcessor {
 					}
 
 					if (startElement.getName().getLocalPart().equals("project_summary")) {
-						HashMap<String, Integer> codeMetricsdict = new HashMap<String, Integer>();
-						codeMetricsdict.put("number_of_modules", 1);
+
 
 						writer.writeStartElement("Region");
 						writer.writeAttribute("id", RegionId + "");
@@ -145,27 +180,48 @@ public class ccccProcessor {
 							if (xmlEvent.isStartElement()) {
 								writer.writeCharacters(System.getProperty("line.separator"));
 								writer.writeStartElement("Metric");
-								writer.writeAttribute("code", "1");
+
 
 								// Get event as start element.
 								StartElement startElementmetrics = xmlEvent.asStartElement();
+
+
+								if  (codeMetricsdict.get(startElementmetrics.getName().getLocalPart())!=null)
+								{
+									writer.writeAttribute("code",codeMetricsdict.get(startElementmetrics.getName().getLocalPart().toString()).toString());
+								}
+								else {
+									writer.writeAttribute("code", "1111111");
+								}
+
 								// choose appropriate name using map
 								writer.writeAttribute("name", startElementmetrics.getName().toString());
 
 								Iterator<Attribute> attributes = startElementmetrics.getAttributes();
 								while (attributes.hasNext()) {
 									Attribute myAttribute = attributes.next();
+
+
 									if (myAttribute.getName().toString().equals("value")) {
-										writer.writeAttribute("value", myAttribute.getValue());
+
+										if (myAttribute.getValue().matches("^\\*+") || myAttribute.getValue().matches("^-+")){
+											writer.writeAttribute("value", "0");
+										}
+										else {
+											writer.writeAttribute("value", myAttribute.getValue());
+										}
+
+
+
 									}
 								}
 								if (startElementmetrics.getName().getLocalPart().equals("lines_of_code")) {
 
 								}
-								if (codeMetricsdict.containsKey(startElementmetrics.getName().getLocalPart())) {
-
-									System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaa");
-								}
+								//if (codeMetricsdict.containsKey(startElementmetrics.getName().getLocalPart())) {
+//
+								//	System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaa");
+								//}
 
 							}
 							if (xmlEvent.isEndElement()) {
@@ -244,8 +300,7 @@ public class ccccProcessor {
 										 startElement = xmlEventmodule.asStartElement();
 
 										if (startElement.getName().getLocalPart().equals("module_summary")) {
-											HashMap<String, Integer> codeMetricsdict = new HashMap<String, Integer>();
-											codeMetricsdict.put("number_of_modules", 1);
+
 
 											xmlEventmodule = xmlEventReaderModuleFile.nextEvent();
 
@@ -260,28 +315,39 @@ public class ccccProcessor {
 												if (xmlEventmodule.isStartElement()) {
 													writer.writeCharacters(System.getProperty("line.separator"));
 													writer.writeStartElement("Metric");
-													writer.writeAttribute("code", "1");
+													//
+													// writer.writeAttribute("code", "1");
+
+
+
 
 													// Get event as start element.
 													StartElement startElementmetrics = xmlEventmodule.asStartElement();
 													// choose appropriate name using map
+													if  (codeMetricsdict.get(startElementmetrics.getName().getLocalPart())!=null)
+													{
+														writer.writeAttribute("code",codeMetricsdict.get(startElementmetrics.getName().getLocalPart().toString()).toString());
+													}
+													else {
+														writer.writeAttribute("code", "1111111");
+													}
+
 													writer.writeAttribute("name", startElementmetrics.getName().toString());
 
 													Iterator<Attribute> attributes = startElementmetrics.getAttributes();
 													while (attributes.hasNext()) {
 														Attribute myAttribute = attributes.next();
 														if (myAttribute.getName().toString().equals("value")) {
-															writer.writeAttribute("value", myAttribute.getValue());
+
+															if (myAttribute.getValue().matches("^\\*+") ||myAttribute.getValue().matches("^-+")){
+																writer.writeAttribute("value", "0");
+															}
+															else {
+																writer.writeAttribute("value", myAttribute.getValue());
+															}
+
 														}
 													}
-													if (startElementmetrics.getName().getLocalPart().equals("lines_of_code")) {
-
-													}
-													if (codeMetricsdict.containsKey(startElementmetrics.getName().getLocalPart())) {
-
-														System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaa");
-													}
-
 												}
 												if (xmlEventmodule.isEndElement()) {
 													writer.writeEndElement();
@@ -292,13 +358,8 @@ public class ccccProcessor {
 													Boolproject_summary = xmlEventmodule.asEndElement().getName().toString()
 															.equals("module_summary");
 												}
-
 											}
-
 										}
-
-
-
 									}
 									if (xmlEventmodule.isEndElement()) {
 
@@ -312,36 +373,12 @@ public class ccccProcessor {
 										System.out.println("End Element: " + endElement.getName());
 									}
 
-
 								}
 
 
 								writer.writeEndElement();
-								//for each module create region - parent = 1 id = idprev ++ 
-								
-								///File = new(modName+".xml");
-//								<module_summary>
-//								<lines_of_code value="0" level="0" />
-//								<lines_of_code_per_member_function value="******" level="0" />
-//								<McCabes_cyclomatic_complexity value="0" level="0" />
-//								<McCabes_cyclomatic_complexity_per_member_function value="******" level="0" />
-//								<lines_of_code value="0" level="0" />
-//								<lines_of_code_per_member_function value="********" level="0" />
-//								<lines_of_code_per_line_of_comment value="------" level="0" />
-//								<McCabes_cyclomatic_complexity_per_line_of_comment value="------" level="0" />
-//								<weighted_methods_per_class_unity value="0" level="0" />
-//								<weighted_methods_per_class_visibility value="0" level="0" />
-//								<depth_of_inheritance_tree value="0" level="0" />
-//								<number_of_children value="0" level="0" />
-//								<coupling_between_objects value="0" level="0" />
-//								<IF4 value="0" level="0" />
-//								<IF4_per_member_function value="********" level="0" />
-//								<IF4_visible value="0" level="0" />
-//								<IF4_visible_per_member_function value="********" level="0" />
-//								<IF4_concrete value="0" level="0" />
-//								<IF4_concrete_per_member_function value="********" level="0" />
-//								</module_summary>
-								//parse and write to the file
+
+								//write new child region with functions
 								//
 								
 							}
