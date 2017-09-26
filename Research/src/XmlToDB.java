@@ -14,11 +14,14 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.Reader;
 import java.sql.*;
-import java.util.Iterator;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.Date;
 import java.util.logging.*;
 
 public class XmlToDB {
     String metricTable = "metric_store";
+    String regionTable = "region";
     String fileName = null;
     String url = "jdbc:postgresql://localhost:5432/postgres";
     String name = "postgres";
@@ -72,56 +75,184 @@ public class XmlToDB {
             // File Path
             // For out
             Statement stmt = null;
-            try {
-                Class.forName("org.postgresql.Driver");
 
-                connection.setAutoCommit(false);
-                System.out.println("Opened database successfully");
-
-                stmt = connection.createStatement();
-                String sql = "INSERT INTO "+metricTable+" (region_id,metric_code,value) "
-                        + "VALUES (1, 1, 32 );";
-                stmt.executeUpdate(sql);
-            }
-            catch (Exception e){
-                System.out.println(e.getMessage());
-
-
-            }
 
             Reader fileReader = new FileReader(file);
             XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
             XMLEventReader xmlEventReader = xmlInputFactory.createXMLEventReader(fileReader);
             System.out.print("we are ready to process");
+            HashMap<Integer, Integer> codeMetricsRegions = new HashMap<Integer, Integer>();
+            Integer currentID = null;
+            Integer parentID = null;
+            String regName = "";
+            String regLanguage = "";
+            String regType = "";
+            Date timeStamp=new Timestamp(0);
+            SimpleDateFormat dateFormatout = new SimpleDateFormat("yyyy-dd-MM'T'HH:mm:ss.S");
+
+
+
 
 
             while (xmlEventReader.hasNext()) {
 
                 XMLEvent xmlEvent = xmlEventReader.nextEvent();
                 if (xmlEvent.isStartElement()) {
-                    // Get event as start element.
+
                     StartElement startElement = xmlEvent.asStartElement();
                     System.out.println("Start Element: " + startElement.getName());
-
                     if (startElement.getName().getLocalPart().equals("SMEF")) {
-                        // Get the 'id' attribute from Employee element
-
                         StartElement startElementmetrics = xmlEvent.asStartElement();
                         Iterator<Attribute> attributes = startElementmetrics.getAttributes();
-                        xmlEvent = xmlEventReader.nextEvent();
+                        while (attributes.hasNext()) {
+                            Attribute myAttribute = attributes.next();
+
+                            if (myAttribute.getName().toString().equals("extractionTimestamp")) {
+                               // String timestamp = (xmlEvent.asCharacters().getData());
+
+
+                                //timeStamp = myAttribute.getValue();
+
+                                timeStamp = dateFormatout.parse(myAttribute.getValue());
+                                System.out.print(timeStamp);
+                            }
+                        }
                     }
+
+                    if (startElement.getName().getLocalPart().equals("Region")) {
+                        StartElement startElementmetrics = xmlEvent.asStartElement();
+                        Iterator<Attribute> attributes = startElementmetrics.getAttributes();
+                        while (attributes.hasNext()) {
+                            Attribute myAttribute = attributes.next();
+
+                            if (myAttribute.getName().toString().equals("parentID")) {
+                                parentID = Integer.parseInt(myAttribute.getValue());
+                                System.out.print("pid777"+parentID);
+                            }
+                            if (myAttribute.getName().toString().equals("id")) {
+                                currentID = Integer.parseInt(myAttribute.getValue());
+                            }
+                            if (myAttribute.getName().toString().equals("language")) {
+                                regLanguage = myAttribute.getValue();
+                            }
+                            if (myAttribute.getName().toString().equals("name")) {
+                                regName = myAttribute.getValue();
+                            }
+                            if (myAttribute.getName().toString().equals("type")) {
+                                regType = myAttribute.getValue();
+                            }
+                        }
+
+                        try {
+                            Class.forName("org.postgresql.Driver");
+
+                            connection.setAutoCommit(false);
+                            System.out.println("Opened database successfully");
+                            //prepared statments
+                           // PreparedStatement ps = connection.prepareStatement("")
+                             //       ps.setTimestamp(1, new Timestamps(xxxx));
+                            PreparedStatement preparedStatement = connection.prepareStatement(
+                                    "INSERT INTO "+regionTable+
+                                            "(parent_id,extraction_time_stamp,language,type,name) VALUES(?,?,?,?,?) RETURNING id;"
+                            );
+                            System.out.print("PID:"+codeMetricsRegions.get(parentID));
+                           if (parentID.equals(0)){preparedStatement.setInt(1, parentID);}
+                            else { preparedStatement.setInt(1, codeMetricsRegions.get(parentID));}
+
+
+                            //preparedStatement.setInt(1, 1);
+                            preparedStatement.setTimestamp(2, new Timestamp(timeStamp.getTime()));
+                            preparedStatement.setInt(3,Integer.parseInt(regLanguage));
+                            preparedStatement.setInt(4,Integer.parseInt(regType));
+                            preparedStatement.setString(5,regName);
+
+
+                            System.out.print(preparedStatement);
+
+
+                            ResultSet rs = preparedStatement.executeQuery();
+                            rs.next();
+                            System.out.println("Result" + rs.getInt(1));
+                            codeMetricsRegions.put(currentID, rs.getInt(1));
+
+
+                            stmt.close();
+
+                            connection.commit();
+                        } catch (Exception e) {
+                            System.out.println(e.getMessage());
+
+
+                        }
+
+
+                    }
+
 
                     if (startElement.getName().getLocalPart().equals("Metric")) {
                         // Get the 'id' attribute from Employee element
                         //sss
-                        xmlEvent = xmlEventReader.nextEvent();
+
+
+                        String code = "";
+                        String value = "";
+                        StartElement startElementmetrics = xmlEvent.asStartElement();
+
+                        Iterator<Attribute> attributes = startElementmetrics.getAttributes();
+
+                        while (attributes.hasNext()) {
+                            Attribute myAttribute = attributes.next();
+
+                            if (myAttribute.getName().toString().equals("code")) {
+
+                                code = myAttribute.getValue();
+                                System.out.println("code" + code);
+
+                            }
+                            if (myAttribute.getName().toString().equals("value")) {
+
+                                value = myAttribute.getValue();
+                                System.out.println("value" + value);
+
+                            }
+
+                        }
+
+
+                        try {
+                            Class.forName("org.postgresql.Driver");
+
+                            connection.setAutoCommit(false);
+                            System.out.println("Opened database successfully");
+                            //int currentDbId= codeMetricsRegions.get(currentID);
+                            //System.out.println("cuurdbID"+currentDbId);
+
+                            stmt = connection.createStatement();
+                            String sql = "INSERT INTO " + metricTable + " (region_id,metric_code,value) "
+                                    + "VALUES ("+codeMetricsRegions.get(currentID)+", " + code + ", " + value + " ) RETURNING id;";
+                            System.out.print(sql);
+
+
+
+
+                            ResultSet rs = stmt.executeQuery(sql);
+                            rs.next();
+                            System.out.println("Result" + rs.getInt(1));
+
+
+
+                            stmt.close();
+
+                            connection.commit();
+                        } catch (Exception e) {
+                            System.out.println(e.getMessage());
+
+
+                        }
+
+
                     }
-
                 }
-                else{
-
-                }
-
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -137,112 +268,12 @@ public class XmlToDB {
 
         }
 
-
-        //open file
-        //connect to db
-        //
-
     }
 
 
     public static void main(String[] args) {
         XmlToDB xmlToDBInstance = new XmlToDB("output2.xml");
 
-        Connection connection = null;
-        String url = "jdbc:postgresql://localhost:5432/postgres";
-        String name = "postgres";
-        String password = "1";
-
-        try {
-            //Загружаем драйвер
-            Class.forName("org.postgresql.Driver");
-            System.out.println("Драйвер подключен");
-            //Создаём соединение
-            connection = DriverManager.getConnection(url, name, password);
-            System.out.println("Соединение установлено");
-            //Для использования SQL запросов существуют 3 типа объектов:
-            //1.Statement: используется для простых случаев без параметров
-            Statement statement = null;
-
-            statement = connection.createStatement();
-            //Выполним запрос
-            // ResultSet result1 = statement.executeQuery(
-            //          "SELECT * FROM users where id >2 and id <10");
-            //result это указатель на первую строку с выборки
-            //чтобы вывести данные мы будем использовать
-            //метод next() , с помощью которого переходим к следующему элементу
-            // System.out.println("Выводим statement");
-            // while (result1.next()) {
-            //      System.out.println("Номер в выборке #" + result1.getRow()
-            //              + "\t Номер в базе #" + result1.getInt("id")
-            //              + "\t" + result1.getString("username"));
-            //   }
-            // Вставить запись
-            // statement.executeUpdate(
-            //         "INSERT INTO users(username) values('name')");
-            //Обновить запись
-            // statement.executeUpdate(
-            //         "UPDATE users SET username = 'admin' where id = 1");
-
-
-            //2.PreparedStatement: предварительно компилирует запросы,
-            //которые могут содержать входные параметры
-            // PreparedStatement preparedStatement = null;
-            // ? - место вставки нашего значеня
-            //  preparedStatement = connection.prepareStatement(
-            //          "SELECT * FROM users where id > ? and id < ?");
-            //Устанавливаем в нужную позицию значения определённого типа
-            //   preparedStatement.setInt(1, 2);
-            //  preparedStatement.setInt(2, 10);
-            //выполняем запрос
-            //  ResultSet result2 = preparedStatement.executeQuery();
-
-            //   System.out.println("Выводим PreparedStatement");
-            //   while (result2.next()) {
-            //        System.out.println("Номер в выборке #" + result2.getRow()
-            //                + "\t Номер в базе #" + result2.getInt("id")
-            //               + "\t" + result2.getString("username"));
-            //    }
-
-            //    preparedStatement = connection.prepareStatement(
-            //            "INSERT INTO users(username) values(?)");
-            //     preparedStatement.setString(1, "user_name");
-            //метод принимает значение без параметров
-            //темже способом можно сделать и UPDATE
-            //    preparedStatement.executeUpdate();
-
-
-            //3.CallableStatement: используется для вызова хранимых функций,
-            // которые могут содержать входные и выходные параметры
-            //    CallableStatement callableStatement = null;
-            //Вызываем функцию myFunc (хранится в БД)
-            //    callableStatement = connection.prepareCall(
-            //           " { call myfunc(?,?) } ");
-            //Задаём входные параметры
-            //    callableStatement.setString(1, "Dima");
-            //    callableStatement.setString(2, "Alex");
-            //Выполняем запрос
-            //    ResultSet result3 = callableStatement.executeQuery();
-            //Если CallableStatement возвращает несколько объектов ResultSet,
-            //то нужно выводить данные в цикле с помощью метода next
-            //у меня функция возвращает один объект
-            //     result3.next();
-            //    System.out.println(result3.getString("MESSAGE"));
-            //если функция вставляет или обновляет, то используется метод executeUpdate()
-
-        } catch (Exception ex) {
-            System.out.print(ex.getMessage().toString());
-            //выводим наиболее значимые сообщения
-
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException ex) {
-
-                }
-            }
-        }
 
     }
 

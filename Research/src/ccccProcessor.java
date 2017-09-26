@@ -85,7 +85,11 @@ public class ccccProcessor {
 		codeMetricsdict.put("IF4_concrete_per_member_function", 26);
 		codeMetricsdict.put("IF4_visible_per_member_function", 27);
 
+		HashMap<String, Integer> languageDict = new HashMap<String, Integer>();
+		languageDict.put("C++",1);
 
+		HashMap<String, Integer> typeDict = new HashMap<String, Integer>();
+		typeDict.put("Module",1);
 
 
 
@@ -162,8 +166,10 @@ public class ccccProcessor {
 						writer.writeAttribute("id", RegionId + "");
 						RegionId++;
 						writer.writeAttribute("parentID", "0");
-						writer.writeAttribute("language", "C++");
-						writer.writeAttribute("type", "Project");
+						//writer.writeAttribute("language", "C++");
+						writer.writeAttribute("language", "1");
+						//writer.writeAttribute("type", "Project");
+						writer.writeAttribute("type", "1");
 
 						// where take name ?
 						writer.writeAttribute("name", "ProjectSummary");
@@ -195,7 +201,7 @@ public class ccccProcessor {
 								}
 
 								// choose appropriate name using map
-								writer.writeAttribute("name", startElementmetrics.getName().toString());
+								//writer.writeAttribute("name", startElementmetrics.getName().toString());
 
 								Iterator<Attribute> attributes = startElementmetrics.getAttributes();
 								while (attributes.hasNext()) {
@@ -285,9 +291,10 @@ public class ccccProcessor {
 								writer.writeAttribute("id", RegionId + "");
 								RegionId++;
 								writer.writeAttribute("parentID", "1");
-								writer.writeAttribute("language", "C++");
-								writer.writeAttribute("type", "module");
-
+								//writer.writeAttribute("language", "C++");
+								writer.writeAttribute("language", "1");
+								//writer.writeAttribute("type", "module");
+								writer.writeAttribute("type", "2");
 								// where take name ?
 								writer.writeAttribute("name", modName);
 
@@ -332,7 +339,7 @@ public class ccccProcessor {
 														writer.writeAttribute("code", "1111111");
 													}
 
-													writer.writeAttribute("name", startElementmetrics.getName().toString());
+													//writer.writeAttribute("name", startElementmetrics.getName().toString());
 
 													Iterator<Attribute> attributes = startElementmetrics.getAttributes();
 													while (attributes.hasNext()) {
