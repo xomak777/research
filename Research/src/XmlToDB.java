@@ -22,6 +22,7 @@ import java.util.logging.*;
 public class XmlToDB {
     String metricTable = "metric_store";
     String regionTable = "region";
+    String projectTable = "project";
     String fileName = null;
     String url = "jdbc:postgresql://localhost:5432/postgres";
     String name = "postgres";
@@ -83,6 +84,7 @@ public class XmlToDB {
             System.out.print("we are ready to process");
             HashMap<Integer, Integer> codeMetricsRegions = new HashMap<Integer, Integer>();
             Integer currentID = null;
+            Integer projectID = null;
             Integer parentID = null;
             String regName = "";
             String regLanguage = "";
@@ -117,6 +119,43 @@ public class XmlToDB {
                                 System.out.print(timeStamp);
                             }
                         }
+
+                        try {
+                            Class.forName("org.postgresql.Driver");
+
+                            connection.setAutoCommit(false);
+                            System.out.println("Try to insert into project");
+                            //prepared statments
+                            // PreparedStatement ps = connection.prepareStatement("")
+                            //       ps.setTimestamp(1, new Timestamps(xxxx));
+                            PreparedStatement preparedStatement = connection.prepareStatement(
+                                    "INSERT INTO " + projectTable +
+                                            "(extraction_time_stamp,url,name) VALUES(?,?,?) RETURNING id;"
+                            );
+                            System.out.print("PrID:" + codeMetricsRegions.get(parentID));
+                            preparedStatement.setTimestamp(1, new Timestamp(timeStamp.getTime()));
+                            preparedStatement.setString(2,"urlExamle");
+
+                            preparedStatement.setString(3, "nameExample");
+
+                            System.out.print(preparedStatement);
+
+                            ResultSet rs = preparedStatement.executeQuery();
+                            rs.next();
+                            projectID=rs.getInt(1);
+                            System.out.println("Result Project" + projectID);
+
+
+                            stmt.close();
+
+                            connection.commit();
+
+                        }  catch (Exception e) {
+                        System.out.println(e.getMessage());
+
+
+                    }
+
                     }
 
                     if (startElement.getName().getLocalPart().equals("Region")) {
@@ -153,7 +192,8 @@ public class XmlToDB {
                              //       ps.setTimestamp(1, new Timestamps(xxxx));
                             PreparedStatement preparedStatement = connection.prepareStatement(
                                     "INSERT INTO "+regionTable+
-                                            "(parent_id,extraction_time_stamp,language,type,name) VALUES(?,?,?,?,?) RETURNING id;"
+                                            "(parent_id,extraction_time_stamp,language,type,name,project_id) " +
+                                            "VALUES(?,?,?,?,?,?) RETURNING id;"
                             );
                             System.out.print("PID:"+codeMetricsRegions.get(parentID));
                            if (parentID.equals(0)){preparedStatement.setInt(1, parentID);}
@@ -165,7 +205,7 @@ public class XmlToDB {
                             preparedStatement.setInt(3,Integer.parseInt(regLanguage));
                             preparedStatement.setInt(4,Integer.parseInt(regType));
                             preparedStatement.setString(5,regName);
-
+                            preparedStatement.setInt(6,projectID);
 
                             System.out.print(preparedStatement);
 
