@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="3fd75564-962d-456b-8d84-5a41c1731c5e" name="Default" comment="" />
+    <list default="true" id="3fd75564-962d-456b-8d84-5a41c1731c5e" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+    </list>
     <ignored path="$PROJECT_DIR$/Research/bin/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -60,7 +62,7 @@
       <file leaf-file-name="XmlToDB.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Research/src/XmlToDB.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="900">
+            <state relative-caret-position="1296">
               <caret line="145" column="77" lean-forward="false" selection-start-line="145" selection-start-column="77" selection-end-line="145" selection-end-column="77" />
               <folding>
                 <element signature="n#!!doc" expanded="true" />
@@ -561,7 +563,7 @@
       <workItem from="1505549556017" duration="899000" />
       <workItem from="1505592702032" duration="1879000" />
       <workItem from="1505940883200" duration="9032000" />
-      <workItem from="1506008578109" duration="48630000" />
+      <workItem from="1506008578109" duration="48788000" />
     </task>
     <task id="LOCAL-00001" summary="test intelijidea">
       <created>1505506844598</created>
@@ -623,7 +625,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="67677000" />
+    <option name="totallyTimeSpent" value="67835000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1299,7 +1301,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Research/src/XmlToDB.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="900">
+        <state relative-caret-position="1296">
           <caret line="145" column="77" lean-forward="false" selection-start-line="145" selection-start-column="77" selection-end-line="145" selection-end-column="77" />
           <folding>
             <element signature="n#!!doc" expanded="true" />
